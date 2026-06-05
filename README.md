@@ -45,7 +45,7 @@ The portable HTML includes:
 
 ![HTML report overview](https://github.com/ArronJablonowski/CQL_Mapped_to_Mitre/blob/main/__pycache__/html_mitre_mapping.png?raw=true)
 
-Collapsible MITRE ATT&CK Enterprise matrix. 
+Copy-to-clipboard CQL queries 
 ![HTML report overview](https://github.com/ArronJablonowski/CQL_Mapped_to_Mitre/blob/main/__pycache__/mitre_coverage.png?raw=true)
 
 ## Obsidian Vault
