@@ -43,6 +43,11 @@ The portable HTML includes:
 - Persistent Global Coverage Checklist state using local browser storage
 - Collapsible MITRE ATT&CK Enterprise matrix with covered techniques highlighted in green
 
+![Birtha HTML report overview](https://github.com/ArronJablonowski/CQL_Mapped_to_Mitre/blob/main/__pycache__/html_mitre_mapping.png?raw=true)
+
+Collapsible MITRE ATT&CK Enterprise matrix. 
+![Birtha HTML report overview](https://github.com/ArronJablonowski/CQL_Mapped_to_Mitre/blob/main/__pycache__/mitre_coverage.png?raw=true)
+
 ## Obsidian Vault
 
 The markdown files are formatted for Obsidian and organized by ATT&CK tactic:
