@@ -739,16 +739,39 @@ HTML_TEMPLATE = r"""<!doctype html>
     .brand { min-width: 220px; }
     .brand strong { display: block; font-size: 15px; line-height: 1.1; }
     .brand span { color: var(--muted); font-size: 12px; }
-    .search {
+    .search-wrap {
       width: min(560px, 100%);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
       border: 1px solid var(--line);
       background: var(--surface);
       border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .search-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14); }
+    .search {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      background: transparent;
       padding: 10px 12px;
       color: var(--ink);
       outline: none;
     }
-    .search:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14); }
+    .clear-search {
+      min-height: 36px;
+      padding: 0 12px;
+      border: 0;
+      border-left: 1px solid var(--line);
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+    }
+    .clear-search:hover { color: var(--ink); background: var(--surface-2); }
+    .clear-search[hidden] { display: none; }
     .shell {
       display: grid;
       grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
@@ -1174,7 +1197,10 @@ HTML_TEMPLATE = r"""<!doctype html>
         <strong>CrowdStrike CQL Mapping</strong>
         <span>Portable MITRE ATT&CK Reference</span>
       </div>
-      <input id="search" class="search" type="search" placeholder="Search tactics, techniques, procedures, fields, or CQL..." autocomplete="off">
+      <div class="search-wrap">
+        <input id="search" class="search" type="search" placeholder="Search tactics, techniques, procedures, fields, or CQL..." autocomplete="off">
+        <button id="clearSearch" class="clear-search" type="button" hidden>Clear</button>
+      </div>
       <div class="topbar-credit">by: <a href="https://www.linkedin.com/in/arronjablonowski/" target="_blank" rel="noopener noreferrer">Arron Jablonowski</a></div>
     </header>
     <div class="shell">
@@ -1204,6 +1230,7 @@ HTML_TEMPLATE = r"""<!doctype html>
   <script type="application/json" id="export-metadata">__PAYLOAD__</script>
   <script>
     const search = document.getElementById('search');
+    const clearSearch = document.getElementById('clearSearch');
     const sections = Array.from(document.querySelectorAll('.doc-section'));
     const navCards = Array.from(document.querySelectorAll('.tactic-card'));
     const noResults = document.getElementById('noResults');
@@ -1211,13 +1238,19 @@ HTML_TEMPLATE = r"""<!doctype html>
     const resetChecklist = document.getElementById('resetChecklist');
     const checklistKey = 'mitre-cql-coverage-checklist-v1';
 
-    const normalizeSearchText = (value) => {
-      return (value || '')
+    const normalizeSearchText = (value, includeCompact = true) => {
+      const normalized = (value || '')
+        .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
         .toLowerCase()
         .normalize('NFKD')
         .replace(/[\u0300-\u036f]/g, '')
+        .replace(/att&ck/g, 'attack attck mitre att ck')
+        .replace(/&/g, ' and ')
+        .replace(/[^a-z0-9]+/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
+      const compact = normalized.replace(/\s+/g, '');
+      return includeCompact && compact && compact !== normalized ? `${normalized} ${compact}` : normalized;
     };
 
     // Cache searchable text once at page load. This avoids the hidden-section
@@ -1297,8 +1330,8 @@ HTML_TEMPLATE = r"""<!doctype html>
       }
     });
 
-    search.addEventListener('input', () => {
-      const value = normalizeSearchText(search.value);
+    const applySearch = () => {
+      const value = normalizeSearchText(search.value, false);
       const terms = value.split(' ').filter(Boolean);
       let visible = 0;
       sections.forEach((section) => {
@@ -1318,6 +1351,21 @@ HTML_TEMPLATE = r"""<!doctype html>
       searchStatus.textContent = terms.length === 0
         ? 'Showing all sections.'
         : `Showing ${visible} of ${sections.length} sections.`;
+      clearSearch.hidden = terms.length === 0;
+    };
+
+    search.addEventListener('input', applySearch);
+    search.addEventListener('search', applySearch);
+    search.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && search.value) {
+        search.value = '';
+        applySearch();
+      }
+    });
+    clearSearch.addEventListener('click', () => {
+      search.value = '';
+      applySearch();
+      search.focus();
     });
   </script>
 </body>
